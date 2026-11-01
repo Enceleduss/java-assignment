@@ -127,4 +127,15 @@ public class StoreResourceTest {
 
     given().when().delete("/store/999999").then().statusCode(404);
   }
+
+  @Test
+  public void testCreateRejectsStoreWithAnExistingId() {
+    given()
+        .contentType(ContentType.JSON)
+        .body("{\"id\":99,\"name\":\"INVALID-STORE\",\"quantityProductsInStock\":1}")
+        .when()
+        .post("/store")
+        .then()
+        .statusCode(422);
+  }
 }

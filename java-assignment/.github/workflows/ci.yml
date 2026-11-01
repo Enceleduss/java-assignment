@@ -11,6 +11,9 @@ jobs:
   unit-tests:
     name: Unit tests and coverage
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./java-assignment
     steps:
       - name: Check out source
         uses: actions/checkout@v4

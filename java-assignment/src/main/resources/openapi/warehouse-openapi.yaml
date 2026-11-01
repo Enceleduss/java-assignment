@@ -1,0 +1,228 @@
+openapi: 3.0.0
+info:
+  title: Warehouse API
+  description: API for managing products in a warehouse
+  version: 1.0.0
+
+paths:
+  /warehouse:
+    get:
+      summary: List all warehouses units
+      responses:
+        '200':
+          description: A list of warehouse units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Warehouse'
+    post:
+      summary: Create a new warehouse unit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Warehouse'
+      responses:
+        '201':
+          description: Warehouse unit created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Warehouse'
+        
+        '400':
+          description: Invalid request parameters
+
+  /warehouse/{id}:
+    get:
+      summary: Get a warehouse unit by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the warehouse unit to get
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Warehouse unit found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Warehouse'
+        '404':
+          description: Warehouse unit not found
+    delete:
+      summary: Archive a warehouse unit by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the warehouse unit to archive
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Warehouse unit archived
+        '404':
+          description: Warehouse unit not found
+
+  /warehouse/{businessUnitCode}/replacement:
+    post:
+      summary: Replace the current active Warehouse
+      description: | 
+        Replaces the current active Warehouse identified by `businessUnitCode` unit by a new Warehouse provided in the request body
+        A Warehouse can be replaced by another Warehouse with the same Business Unit Code. 
+        That means that the previous Warehouse will be archived and the new Warehouse will be created assuming its place.
+      parameters:
+        - name: businessUnitCode
+          in: path
+          required: true
+          description: Business unit code of the warehouse unit to replace
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Warehouse'
+      responses:
+        '200':
+          description: Warehouse unit replaced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Warehouse'
+        '404':
+          description: Warehouse unit not found
+
+        '400':
+          description: Invalid request parameters
+  /fulfilment:
+    post:
+      summary: Create a new fulfilment association
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FulfilmentUnit'
+      responses:
+        201:
+          description: Created
+        409:
+          description: Conflict (constraint violation)
+        404:
+          description: Not Found (entity doesn't exist)
+    get:
+      summary: List all fulfilment associations
+      responses:
+        200:
+          description: A list of fulfilment units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FulfilmentUnit'
+  /fulfilment/warehouse/{businessUnitCode}:
+    get:
+      summary: Get all fulfilments for a warehouse
+      parameters:
+        - name: businessUnitCode
+          in: path
+          required: true
+          description: Business Unit Code of the warehouse for which fulfilment units to get
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of fulfilment units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FulfilmentUnit'
+  /fulfilment/store/{storeId}:
+    get:
+      summary: Get all fulfilments for a store
+      parameters:
+        - name: Store Id
+          in: path
+          required: true
+          description: Store Id of the store for which fulfilment units to get
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of fulfilment units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FulfilmentUnit'
+  /fulfilment/product/{productId}/store/{storeId}:
+    get:
+      summary: Get warehouses fulfilling a product at a store
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Product Id for which fulfilment units to get
+          schema:
+            type: integer
+            format: int64
+        - name: storeId
+          in: path
+          required: true
+          description: Store Id of the store for which fulfilment units to get
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of fulfilment units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Warehouse'
+components:
+  schemas:
+    Warehouse:
+      type: object
+      properties:
+        businessUnitCode:
+          type: string
+          example: "MWH.001"
+        location:
+          type: string
+          example: "AMSTERDAM-001"
+        capacity:
+          type: integer
+          example: 100
+        stock:
+          type: integer
+          example: 50
+    FulfilmentUnit:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+          example: 1001
+        storeId:
+          type: string
+          example: "S001"
+        warehouseBusinessUnitCode:
+          type: string
+          example: "MWH.001"
+
